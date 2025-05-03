@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 
-app.set('trust proxy', true);
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 2 : false);
 
 const allowedOrigins = [
     'https://gin.zmal.top',
