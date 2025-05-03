@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deepseek Chat</title>
+  <link rel="stylesheet" href="./style.css">
+  <!-- Add favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <h1>DeepSeek问答助手</h1>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="输入问题..." 
+                   onkeypress="if(event.key === 'Enter') sendQuestion()">
+            <button onclick="sendQuestion()">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // Better API endpoint configuration
+        const API_ENDPOINT = `${window.location.protocol}//${window.location.host}/api/ask`;
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        
+        // Add loading state
+        function setLoading(isLoading) {
+            userInput.disabled = isLoading;
+            document.querySelector('button').disabled = isLoading;
+        }
+        
+        async function sendQuestion() {
+            const question = userInput.value.trim();
+            if (!question) return;
+            
+            // Add user message
+            chatBox.innerHTML += `<div class="user-msg">你：${question}</div>`;
+            userInput.value = '';
+            
+            // Add loading indicator
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'loading-msg';
+            loadingMsg.textContent = '思考中...';
+            chatBox.appendChild(loadingMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            setLoading(true);
+            
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Remove loading message
+                chatBox.removeChild(loadingMsg);
+                
+                // Add AI response
+                chatBox.innerHTML += `<div class="ai-msg">AI：${data.answer}</div>`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                chatBox.innerHTML += `<div class="error-msg">错误：获取回答失败 (${error.message})</div>`;
+            } finally {
+                setLoading(false);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>

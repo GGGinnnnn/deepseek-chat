@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/ask.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "/(index.html|style.css|app.js|favicon.ico)",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/ask",
+      "dest": "api/ask.js",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://gin.zmal.top"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    }
+    ,{
+      "features": {
+        "logging": {
+          "level": "info",  
+          "stream": true
+        }
+      }
+    }
+  ]
+}
